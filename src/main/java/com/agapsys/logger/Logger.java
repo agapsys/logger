@@ -80,6 +80,15 @@ public class Logger {
 		}
 	}
 	
+	/** Closes all associated streams. */
+	public void closeAllStreams() {
+		synchronized(synchronizer) {
+			for (LoggerStream stream : streams) {
+				stream.close();
+			}
+		}
+	}
+	
 	/** @return the locale passed in constructor. */
 	public Locale getLocale() {
 		if (locale == null)
