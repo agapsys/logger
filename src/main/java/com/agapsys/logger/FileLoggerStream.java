@@ -43,6 +43,7 @@ public class FileLoggerStream implements LoggerStream {
 				printStream.write((msg + "\n").getBytes());
 			} catch (IOException e) {
 				closed = true;
+				throw new RuntimeException(e);
 			}
 		}
 	}
