@@ -19,6 +19,7 @@ package com.agapsys.logger;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,6 +87,13 @@ public class Logger {
 			for (LoggerStream stream : streams) {
 				stream.close();
 			}
+		}
+	}
+	
+	/** Returns a list with all registered streams. */
+	public List<LoggerStream> getRegisteredStreams() {
+		synchronized(synchronizer) {
+			return Collections.unmodifiableList(streams);
 		}
 	}
 	
