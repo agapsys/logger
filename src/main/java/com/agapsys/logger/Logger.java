@@ -13,158 +13,194 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.agapsys.logger;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Logger for multiple stream outputs.
- * This class is intended to be thread safe
+ * Logger for multiple stream outputs. This class is intended to be thread safe
+ *
  * @author Leandro Oliveira (leandro@agapsys.com)
  */
 public class Logger {
-	private final List<LoggerStream> streams = new LinkedList<>();
-	private final Object synchronizer = new Object();
-	private final DateFormat dateFormatter = new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss] ");
-	
+
+	private final Map<LogType, Set<LoggerStream>> streams = new LinkedHashMap<>();
+
 	private Locale locale;
-	
-	
-	/** Constructor. */
+	private Map<LogType, Set<LoggerStream>> readOnlyStreams = null;
+
+	/**
+	 * Constructor.
+	 */
 	public Logger() {
 		this(Locale.getDefault());
 	}
-	
+
 	/**
 	 * Constructor.
+	 *
 	 * @param locale locale used in this instance.
 	 */
 	public Logger(Locale locale) {
-		if (locale == null)
+		if (locale == null) {
 			throw new IllegalArgumentException("Null locale");
-		
+		}
+
 		this.locale = locale;
 	}
 
 	/**
-	 * Adds an output stream to this logger instance.
-	 * @param stream stream to be associated with this logger instance.
+	 * Adds an output stream for given log type
+	 *
+	 * @param logType log type
+	 * @param stream stream to be associated with given log type
 	 */
-	public void addStream(LoggerStream stream) {
-		synchronized(synchronizer) {
-			streams.add(stream);
-		}
-	}
-	
-	/** 
-	 * Removes an stream.
-	 * @param stream stream to be removed.
-	 */
-	public void removeStream(LoggerStream stream) {
-		synchronized(synchronizer) {
-			streams.remove(stream);
-		}
-	}
+	public void addStream(LogType logType, LoggerStream stream) {
+		synchronized (streams) {
+			Set<LoggerStream> streamSet;
 
-	/** Remove all registered streams. */
-	public void removeAllStreams() {
-		synchronized (synchronizer) {
-			streams.clear();
-		}
-	}
-	
-	/** Closes all associated streams. */
-	public void closeAllStreams() {
-		synchronized(synchronizer) {
-			for (LoggerStream stream : streams) {
-				stream.close();
+			if (!streams.containsKey(logType)) {
+				streamSet = new LinkedHashSet<>();
+				streams.put(logType, streamSet);
+			} else {
+				streamSet = streams.get(logType);
+			}
+
+			if (streamSet.add(stream)) {
+				readOnlyStreams = null;
 			}
 		}
 	}
-	
-	/** Returns a list with all registered streams. */
-	public List<LoggerStream> getRegisteredStreams() {
-		synchronized(synchronizer) {
-			return Collections.unmodifiableList(streams);
+
+	/**
+	 * Removes an stream associated with given log type.
+	 *
+	 * @param logType log type
+	 * @param stream stream to be removed.
+	 */
+	public void removeStream(LogType logType, LoggerStream stream) {
+		synchronized (streams) {
+			if (streams.containsKey(logType)) {
+				if (streams.get(logType).remove(stream)) {
+					readOnlyStreams = null;
+				}
+			}
 		}
 	}
-	
-	/** @return the locale passed in constructor. */
-	public Locale getLocale() {
-		if (locale == null)
-			locale = Locale.getDefault();
-		
-		return locale;
+
+	/**
+	 * Remove all registered streams.
+	 */
+	public void removeAllStreams() {
+		synchronized (streams) {
+			boolean resetReadOnlyStreams = streams.size() > 0;
+
+			streams.clear();
+			if (resetReadOnlyStreams) {
+				readOnlyStreams = null;
+			}
+		}
 	}
-	
-	/** 
+
+	/**
+	 * Remove all registered streams associated with given type.
+	 *
+	 * @param logType log type
+	 */
+	public void removeAllStreams(LogType logType) {
+		if (logType == null) {
+			throw new IllegalArgumentException("type == null");
+		}
+
+		synchronized (streams) {
+			Set<LoggerStream> streamSet = streams.get(logType);
+			if (streamSet != null) {
+				boolean resetReadOnlyStreams = streamSet.size() > 0;
+				streamSet.clear();
+				if (resetReadOnlyStreams) {
+					readOnlyStreams = null;
+				}
+			}
+		}
+	}
+
+	/**
+	 * @return a map with all registered streams.
+	 */
+	public Map<LogType, Set<LoggerStream>> getRegisteredStreams() {
+		synchronized (streams) {
+			if (readOnlyStreams == null) {
+				Map<LogType, Set<LoggerStream>> map = new LinkedHashMap<>(streams);
+				for (Map.Entry<LogType, Set<LoggerStream>> entry : map.entrySet()) {
+					Set<LoggerStream> streamSet = Collections.unmodifiableSet(entry.getValue());
+					entry.setValue(streamSet);
+				}
+				readOnlyStreams = Collections.unmodifiableMap(map);
+			}
+			return readOnlyStreams;
+		}
+	}
+
+	/**
+	 * @return the locale passed in constructor.
+	 */
+	public Locale getLocale() {
+		synchronized (streams) {
+			if (locale == null) {
+				locale = Locale.getDefault();
+			}
+
+			return locale;
+		}
+	}
+
+	/**
 	 * Changes the locale registered with this instance.
+	 *
 	 * @param locale locale
 	 */
 	public void setLocale(Locale locale) {
-		if (locale == null)
+		if (locale == null) {
 			throw new IllegalArgumentException("Null locale");
-		
-		synchronized(synchronizer) {
+		}
+
+		synchronized (streams) {
 			this.locale = locale;
 		}
 	}
-	
-	/** 
-	 * @param date date to be formatted
-	 * @return given date formatted as string.
-	 */
-	protected String getFormattedDate(Date date) {
-		return dateFormatter.format(date);
-	}
-	
-	/** @returns Complete message to be printed. */
-	private String getOutputMessage(String message, boolean includeTimeStamp) {
-		String timeString;
-		
-		if (includeTimeStamp) {
-			Calendar cal = Calendar.getInstance();
-			Date now = cal.getTime();
-			
-			timeString = getFormattedDate(now);
-		} else {
-			timeString = "";
-		}
-		
-		
-		return timeString + message;
-	}
-	
+
 	/**
-	 * Writes a message into all registered streams
-	 * @param message message to be written
-	 * @param includeTimeStamp defines if a timestamp shall be included in message.
+	 * @return Complete message to be printed.
+	 * @param logType log type
+	 * @param message message passed in
+	 * {@linkplain Logger#writeLog(LogType, String)} call Default implementation
+	 * just returns given message ignoring logType argument
 	 */
-	public void writeLog(String message, boolean includeTimeStamp) {
-		String tmpMessage = getOutputMessage(message, includeTimeStamp);
-		synchronized(synchronizer) {
-			for (LoggerStream stream : streams) {
-				stream.println(tmpMessage);
-			}
-		}
+	protected String getOutputMessage(LogType logType, String message) {
+		return message;
 	}
 
-	/** 
-	 * Writes a message into all registered streams.
-	 * Convenience method for writeLog(message, true).
+	/**
+	 * Writes a message into all registered streams
+	 *
 	 * @param message message to be written
-	 * @see Logger#writeLog(String, boolean)
+	 * @param logType log type
 	 */
-	public void writLog(String message) {
-		writeLog(message, true);
+	public void writeLog(LogType logType, String message) {
+		String tmpMessage = getOutputMessage(logType, message);
+		synchronized (streams) {
+			Set<LoggerStream> streamSet = streams.get(logType);
+			if (streamSet != null) {
+				for (LoggerStream stream : streamSet) {
+					stream.println(logType, tmpMessage);
+				}
+			}
+		}
 	}
 	// =========================================================================
 }

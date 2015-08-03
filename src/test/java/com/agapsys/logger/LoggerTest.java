@@ -55,10 +55,18 @@ public class LoggerTest {
 		sbls = new StringBufferLoggerStream();
 		fls = new FileLoggerStream(new FileOutputStream(logFile));
 		
-		logger = new Logger();
-		logger.addStream(sbls);
-		logger.addStream(fls);
-		logger.addStream(cls);
+		logger = new Logger() {
+
+			@Override
+			protected String getOutputMessage(LogType logType, String message) {
+				return String.format("[%s] %s", logType.name(), message);
+			}
+			
+		};
+		
+		logger.addStream(LogType.INFO, sbls);
+		logger.addStream(LogType.INFO, fls);
+		logger.addStream(LogType.INFO, cls);
 	}
 	
 	@After
@@ -72,7 +80,7 @@ public class LoggerTest {
 	public void test() throws FileNotFoundException {
 		for(int i = 0; i < 100; i++) {
 			int random = randInt(0, 1000);
-			logger.writLog("Logger test: " + random);
+			logger.writeLog(LogType.INFO, "Logger test: " + random);
 		}
 		
 		// Compare stream contents:

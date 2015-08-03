@@ -39,10 +39,8 @@ public class ConsoleLoggerStream implements LoggerStream {
 	// =========================================================================
 	
 	// INSTANCE SCOPE ==========================================================
-	private ConsoleLoggerStream() {} // Private constructor prevents external instantiation.
-	
 	@Override
-	public void println(String msg) {
+	public void println(LogType logType, String msg) {
 		if (!closed)
 			out.println(msg);
 	}

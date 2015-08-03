@@ -15,18 +15,8 @@
  */
 package com.agapsys.logger;
 
-/**
- * Represents an output stream for log messages
- * @author Leandro Oliveira (leandro@agapsys.com)
- */
-public interface LoggerStream {
-	/** 
-	 * Print a message into stream
-	 * @param msg message to be printed
-	 * @param logType log type
-	 */
-	void println(LogType logType, String msg);
-		
-	/** Closes the stream. */
-	void close();
+public enum LogType {
+	INFO,
+	WARNING,
+	ERROR
 }

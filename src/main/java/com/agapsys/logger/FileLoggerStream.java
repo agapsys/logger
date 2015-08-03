@@ -25,6 +25,7 @@ import java.io.PrintStream;
  * @author Leandro Oliveira (leandro@agapsys.com)
  */
 public class FileLoggerStream implements LoggerStream {
+	private final FileOutputStream fos;
 	private final PrintStream printStream;
 	private boolean closed = false;
 	
@@ -33,11 +34,12 @@ public class FileLoggerStream implements LoggerStream {
 	 * @param fileOutputStream  File output stream associated with this stream.
 	 */
 	public FileLoggerStream(FileOutputStream fileOutputStream) {
+		this.fos = fileOutputStream;
 		this.printStream = new PrintStream(fileOutputStream);
 	}
 
 	@Override
-	public void println(String msg) {
+	public void println(LogType logType, String msg) {
 		if (!closed) {
 			try {
 				printStream.write((msg + "\n").getBytes());
@@ -52,5 +54,9 @@ public class FileLoggerStream implements LoggerStream {
 	public void close() {
 		printStream.close();
 		closed = true;
+	}
+	
+	public FileOutputStream getFileOutputStream() {
+		return fos;
 	}
 }

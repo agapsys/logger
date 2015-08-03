@@ -27,7 +27,7 @@ public class StringBufferLoggerStream implements LoggerStream {
 	private boolean closed = false;
 	
 	@Override
-	public void println(String msg) {
+	public void println(LogType logType, String msg) {
 		if (!closed)
 			buffer.append(msg).append("\n");
 	}
