@@ -18,7 +18,6 @@ package com.agapsys.logger;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,31 +27,11 @@ import java.util.Set;
  * @author Leandro Oliveira (leandro@agapsys.com)
  */
 public class Logger {
-
-	private final Map<LogType, Set<LoggerStream>> streams = new LinkedHashMap<>();
-
-	private Locale locale;
-	private Map<LogType, Set<LoggerStream>> readOnlyStreams = null;
-
-	/**
-	 * Constructor.
-	 */
-	public Logger() {
-		this(Locale.getDefault());
-	}
-
-	/**
-	 * Constructor.
-	 *
-	 * @param locale locale used in this instance.
-	 */
-	public Logger(Locale locale) {
-		if (locale == null) {
-			throw new IllegalArgumentException("Null locale");
-		}
-
-		this.locale = locale;
-	}
+	public static final String INFO    = "INFO";
+	public static final String WARNING = "WARNING";
+	public static final String ERROR   = "ERROR";
+	private final Map<String, Set<LoggerStream>> streams = new LinkedHashMap<>();
+	private Map<String, Set<LoggerStream>> readOnlyStreams = null;
 
 	/**
 	 * Adds an output stream for given log type
@@ -60,7 +39,13 @@ public class Logger {
 	 * @param logType log type
 	 * @param stream stream to be associated with given log type
 	 */
-	public void addStream(LogType logType, LoggerStream stream) {
+	public void addStream(String logType, LoggerStream stream) {
+		if (logType == null || logType.isEmpty())
+			throw new IllegalArgumentException("Null/Empty logType");
+		
+		if (stream == null)
+			throw new IllegalArgumentException("Null stream");
+		
 		synchronized (streams) {
 			Set<LoggerStream> streamSet;
 
@@ -83,7 +68,13 @@ public class Logger {
 	 * @param logType log type
 	 * @param stream stream to be removed.
 	 */
-	public void removeStream(LogType logType, LoggerStream stream) {
+	public void removeStream(String logType, LoggerStream stream) {
+		if (logType == null || logType.isEmpty())
+			throw new IllegalArgumentException("Null/Empty logType");
+		
+		if (stream == null)
+			throw new IllegalArgumentException("Null stream");
+		
 		synchronized (streams) {
 			if (streams.containsKey(logType)) {
 				if (streams.get(logType).remove(stream)) {
@@ -112,10 +103,9 @@ public class Logger {
 	 *
 	 * @param logType log type
 	 */
-	public void removeAllStreams(LogType logType) {
-		if (logType == null) {
-			throw new IllegalArgumentException("type == null");
-		}
+	public void removeAllStreams(String logType) {
+		if (logType == null || logType.isEmpty())
+			throw new IllegalArgumentException("Null/Empty logType");
 
 		synchronized (streams) {
 			Set<LoggerStream> streamSet = streams.get(logType);
@@ -132,11 +122,11 @@ public class Logger {
 	/**
 	 * @return a map with all registered streams.
 	 */
-	public Map<LogType, Set<LoggerStream>> getRegisteredStreams() {
+	public Map<String, Set<LoggerStream>> getRegisteredStreams() {
 		synchronized (streams) {
 			if (readOnlyStreams == null) {
-				Map<LogType, Set<LoggerStream>> map = new LinkedHashMap<>(streams);
-				for (Map.Entry<LogType, Set<LoggerStream>> entry : map.entrySet()) {
+				Map<String, Set<LoggerStream>> map = new LinkedHashMap<>(streams);
+				for (Map.Entry<String, Set<LoggerStream>> entry : map.entrySet()) {
 					Set<LoggerStream> streamSet = Collections.unmodifiableSet(entry.getValue());
 					entry.setValue(streamSet);
 				}
@@ -147,41 +137,13 @@ public class Logger {
 	}
 
 	/**
-	 * @return the locale passed in constructor.
-	 */
-	public Locale getLocale() {
-		synchronized (streams) {
-			if (locale == null) {
-				locale = Locale.getDefault();
-			}
-
-			return locale;
-		}
-	}
-
-	/**
-	 * Changes the locale registered with this instance.
-	 *
-	 * @param locale locale
-	 */
-	public void setLocale(Locale locale) {
-		if (locale == null) {
-			throw new IllegalArgumentException("Null locale");
-		}
-
-		synchronized (streams) {
-			this.locale = locale;
-		}
-	}
-
-	/**
 	 * @return Complete message to be printed.
 	 * @param logType log type
 	 * @param message message passed in
-	 * {@linkplain Logger#writeLog(LogType, String)} call Default implementation
+	 * {@linkplain Logger#writeLog(String, String)} call Default implementation
 	 * just returns given message ignoring logType argument
 	 */
-	protected String getOutputMessage(LogType logType, String message) {
+	protected String getOutputMessage(String logType, String message) {
 		return message;
 	}
 
@@ -191,7 +153,13 @@ public class Logger {
 	 * @param message message to be written
 	 * @param logType log type
 	 */
-	public void writeLog(LogType logType, String message) {
+	public void writeLog(String logType, String message) {
+		if (logType == null || logType.isEmpty())
+			throw new IllegalArgumentException("Null/Empty logType");
+		
+		if (message == null)
+			throw new IllegalArgumentException("Null message");
+		
 		String tmpMessage = getOutputMessage(logType, message);
 		synchronized (streams) {
 			Set<LoggerStream> streamSet = streams.get(logType);

@@ -25,7 +25,7 @@ public interface LoggerStream {
 	 * @param msg message to be printed
 	 * @param logType log type
 	 */
-	void println(LogType logType, String msg);
+	void println(String logType, String msg);
 		
 	/** Closes the stream. */
 	void close();

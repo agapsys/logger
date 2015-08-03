@@ -40,7 +40,7 @@ public class ConsoleLoggerStream implements LoggerStream {
 	
 	// INSTANCE SCOPE ==========================================================
 	@Override
-	public void println(LogType logType, String msg) {
+	public void println(String logType, String msg) {
 		if (!closed)
 			out.println(msg);
 	}

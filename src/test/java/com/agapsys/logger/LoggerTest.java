@@ -58,15 +58,15 @@ public class LoggerTest {
 		logger = new Logger() {
 
 			@Override
-			protected String getOutputMessage(LogType logType, String message) {
-				return String.format("[%s] %s", logType.name(), message);
+			protected String getOutputMessage(String logType, String message) {
+				return String.format("[%s] %s", logType, message);
 			}
 			
 		};
 		
-		logger.addStream(LogType.INFO, sbls);
-		logger.addStream(LogType.INFO, fls);
-		logger.addStream(LogType.INFO, cls);
+		logger.addStream(Logger.INFO, sbls);
+		logger.addStream(Logger.INFO, fls);
+		logger.addStream(Logger.INFO, cls);
 	}
 	
 	@After
@@ -80,7 +80,7 @@ public class LoggerTest {
 	public void test() throws FileNotFoundException {
 		for(int i = 0; i < 100; i++) {
 			int random = randInt(0, 1000);
-			logger.writeLog(LogType.INFO, "Logger test: " + random);
+			logger.writeLog(Logger.INFO, "Logger test: " + random);
 		}
 		
 		// Compare stream contents:

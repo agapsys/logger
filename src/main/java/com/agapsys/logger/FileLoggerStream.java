@@ -39,7 +39,7 @@ public class FileLoggerStream implements LoggerStream {
 	}
 
 	@Override
-	public void println(LogType logType, String msg) {
+	public void println(String logType, String msg) {
 		if (!closed) {
 			try {
 				printStream.write((msg + "\n").getBytes());
