@@ -2,7 +2,7 @@
 
 Welcome to the Java Logging Framework project.
 
-**Attention:** If you obtained the source from a snapshot branch be aware that  such branch can contain unstable code.
+**Attention:** If you obtained the source from a *development* branch be aware that such branch can contain unstable and/or uncompilable code.
 
 ## Compiling
 
@@ -10,15 +10,17 @@ The first build may take a long time as Maven downloads all the dependencies.
 
 ## Dependencies
 
-Java Logging Framework project requires Java 7 compatible runtime and depends on the following external libraries:
+Java Logging Framework project requires Java 7 compatible runtime.
 
-* JUnit (TESTING)
+Test dependencies:
 
-(for detailed information on external dependencies please see pom.xml)
+* JUnit
+
+For detailed information on external dependencies please see *pom.xml*.
 
 ## Licensing
 
-Java Logging Framework project is licensed under the Apache License 2.0. See the files called LICENSE and NOTICE for more information.
+Java Logging Framework project is licensed under the **Apache License 2.0**. See the files called *LICENSE* and *NOTICE* for more information.
 
 ## Contact
 
