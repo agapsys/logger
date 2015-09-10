@@ -50,7 +50,9 @@ public class LoggerTest {
 	
 	@Before
 	public void before() throws FileNotFoundException {
-		logFile = new File("log.txt");
+		File userHome = new File(System.getProperty("user.home"));
+		
+		logFile = new File(userHome, "logger-test-out.txt");
 		
 		sbls = new StringBufferLoggerStream();
 		fls = new FileLoggerStream(new FileOutputStream(logFile));
