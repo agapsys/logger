@@ -16,20 +16,18 @@
 
 package com.agapsys.logger;
 
-import java.util.Date;
-
 /**
  * In-memory stream for log messages.
  * Internally the stream uses an {@linkplain StringBuffer}.
  * @author Leandro Oliveira (leandro@agapsys.com)
  */
-public class StringBufferLoggerStream implements LoggerStream {
+public class StringBufferLoggerStream extends TextLoggerStream {
 	// INSTANCE SCOPE ==========================================================
 	private final StringBuffer buffer = new StringBuffer();
 	private boolean closed = false;
 	
 	@Override
-	public void println(Date localTimestamp, String logType, String msg) {
+	protected void println(String msg) {
 		if (!closed)
 			buffer.append(msg).append("\n");
 	}
