@@ -16,6 +16,7 @@
 package com.agapsys.logger;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -154,6 +155,8 @@ public class Logger {
 	 * @param logType log type
 	 */
 	public void writeLog(String logType, String message) {
+		Date localTimestamp = new Date();
+		
 		if (logType == null || logType.isEmpty())
 			throw new IllegalArgumentException("Null/Empty logType");
 		
@@ -165,7 +168,7 @@ public class Logger {
 			Set<LoggerStream> streamSet = streams.get(logType);
 			if (streamSet != null) {
 				for (LoggerStream stream : streamSet) {
-					stream.println(logType, tmpMessage);
+					stream.println(localTimestamp, logType, tmpMessage);
 				}
 			}
 		}

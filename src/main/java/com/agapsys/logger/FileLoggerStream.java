@@ -19,6 +19,7 @@ package com.agapsys.logger;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Date;
 
 /**
  * File output stream for log messages
@@ -39,7 +40,7 @@ public class FileLoggerStream implements LoggerStream {
 	}
 
 	@Override
-	public void println(String logType, String msg) {
+	public void println(Date localTimestamp, String logType, String msg) {
 		if (!closed) {
 			try {
 				printStream.write((msg + "\n").getBytes());

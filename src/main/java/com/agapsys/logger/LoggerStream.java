@@ -15,6 +15,8 @@
  */
 package com.agapsys.logger;
 
+import java.util.Date;
+
 /**
  * Represents an output stream for log messages
  * @author Leandro Oliveira (leandro@agapsys.com)
@@ -22,10 +24,11 @@ package com.agapsys.logger;
 public interface LoggerStream {
 	/** 
 	 * Print a message into stream
+	 * @param localTimestamp local timestamp
 	 * @param msg message to be printed
 	 * @param logType log type
 	 */
-	void println(String logType, String msg);
+	void println(Date localTimestamp, String logType, String msg);
 		
 	/** Closes the stream. */
 	void close();

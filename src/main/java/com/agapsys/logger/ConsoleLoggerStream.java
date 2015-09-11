@@ -17,6 +17,7 @@
 package com.agapsys.logger;
 
 import java.io.PrintStream;
+import java.util.Date;
 
 /**
  * Console output stream for log messages.
@@ -40,7 +41,7 @@ public class ConsoleLoggerStream implements LoggerStream {
 	
 	// INSTANCE SCOPE ==========================================================
 	@Override
-	public void println(String logType, String msg) {
+	public void println(Date localTimestamp, String logType, String msg) {
 		if (!closed)
 			out.println(msg);
 	}
