@@ -16,6 +16,7 @@
 
 package com.agapsys.logger;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -25,17 +26,31 @@ import java.io.PrintStream;
  * @author Leandro Oliveira (leandro@agapsys.com)
  */
 public class FileLoggerStream extends TextLoggerStream {
-	private final FileOutputStream fos;
+	private final File outputFile;
 	private final PrintStream printStream;
 	private boolean closed = false;
 	
 	/**
 	 * Constructor
-	 * @param fileOutputStream  File output stream associated with this stream.
+	 * @param outputFile outputFile  File which will be used by this stream.
+	 * @param append defines if given file shall be open for append
 	 */
-	public FileLoggerStream(FileOutputStream fileOutputStream) {
-		this.fos = fileOutputStream;
-		this.printStream = new PrintStream(fileOutputStream);
+	public FileLoggerStream(File outputFile, boolean append) {
+		try {
+			FileOutputStream fos = new FileOutputStream(outputFile, append);
+			this.outputFile = outputFile;
+			this.printStream = new PrintStream(fos);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * Constructor
+	 * @param outputFile outputFile File which will be used by this stream (will be open for append).
+	 */
+	public FileLoggerStream(File outputFile) {
+		this(outputFile, true);
 	}
 
 	@Override
@@ -56,7 +71,7 @@ public class FileLoggerStream extends TextLoggerStream {
 		closed = true;
 	}
 	
-	public FileOutputStream getFileOutputStream() {
-		return fos;
+	public File getOutputFile() {
+		return outputFile;
 	}
 }

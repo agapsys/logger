@@ -24,18 +24,11 @@ import java.io.PrintStream;
  */
 public class ConsoleLoggerStream extends TextLoggerStream {
 	// CLASS SCOPE =============================================================
+	
 	private static final PrintStream out = System.out;
 	
 	private static ConsoleLoggerStream singletonInstance;
 	private static boolean closed = false;
-	
-	/** @return A singleton instance. */
-	public static ConsoleLoggerStream getSingletonInstance() {
-		if (singletonInstance == null)
-			singletonInstance = new ConsoleLoggerStream();
-		
-		return singletonInstance;
-	}
 	// =========================================================================
 	
 	// INSTANCE SCOPE ==========================================================

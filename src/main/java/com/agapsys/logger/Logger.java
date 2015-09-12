@@ -138,17 +138,6 @@ public class Logger {
 	}
 
 	/**
-	 * @return Complete message to be printed.
-	 * @param logType log type
-	 * @param message message passed in
-	 * {@linkplain Logger#writeLog(String, String)} call Default implementation
-	 * just returns given message ignoring logType argument
-	 */
-	protected String getOutputMessage(String logType, String message) {
-		return message;
-	}
-
-	/**
 	 * Writes a message into all registered streams
 	 *
 	 * @param message message to be written
@@ -163,12 +152,11 @@ public class Logger {
 		if (message == null)
 			throw new IllegalArgumentException("Null message");
 		
-		String tmpMessage = getOutputMessage(logType, message);
 		synchronized (streams) {
 			Set<LoggerStream> streamSet = streams.get(logType);
 			if (streamSet != null) {
 				for (LoggerStream stream : streamSet) {
-					stream.println(localTimestamp, logType, tmpMessage);
+					stream.println(localTimestamp, logType, message);
 				}
 			}
 		}

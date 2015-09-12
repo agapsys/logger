@@ -17,7 +17,7 @@ package com.agapsys.logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.Random;
 import java.util.Scanner;
 import org.junit.After;
@@ -41,30 +41,52 @@ public class LoggerTest {
 	// =========================================================================
 	
 	// INSTANCE SCOPE ==========================================================
-	private final ConsoleLoggerStream cls = ConsoleLoggerStream.getSingletonInstance();
+	private final ConsoleLoggerStream cls = new ConsoleLoggerStream() {
+		@Override
+		protected String getOutputMessage(Date localTimestamp, String logType, String msg) {
+			return LoggerTest.this.getOutputMessage(localTimestamp, logType, msg);
+		}
+	};
 
 	private Logger logger;
 	private StringBufferLoggerStream sbls;
 	private FileLoggerStream fls;
 	private File logFile;
 	
+	private String getOutputMessage(Date localTimestamp, String logType, String message) {
+		return String.format("[%s] %s", logType, message);
+	}
+	
 	@Before
 	public void before() throws FileNotFoundException {
 		File userHome = new File(System.getProperty("user.home"));
 		
-		logFile = new File(userHome, "logger-test-out.txt");
+		while(true) {
+			String fileName = String.format("logger-test-out-%d", randInt(1, 1000));
+			File tmpFile = new File(userHome, fileName);
+			if (!tmpFile.exists()) {
+				logFile = tmpFile;
+				break;
+			}
+		}
 		
-		sbls = new StringBufferLoggerStream();
-		fls = new FileLoggerStream(new FileOutputStream(logFile));
-		
-		logger = new Logger() {
+		sbls = new StringBufferLoggerStream() {
 
 			@Override
-			protected String getOutputMessage(String logType, String message) {
-				return String.format("[%s] %s", logType, message);
+			protected String getOutputMessage(Date localTimestamp, String logType, String msg) {
+				return LoggerTest.this.getOutputMessage(localTimestamp, logType, msg);
 			}
 			
 		};
+		fls = new FileLoggerStream(logFile, false) {
+
+			@Override
+			protected String getOutputMessage(Date localTimestamp, String logType, String msg) {
+				return LoggerTest.this.getOutputMessage(localTimestamp, logType, msg);
+			}
+		};
+		
+		logger = new Logger();
 		
 		logger.addStream(Logger.INFO, sbls);
 		logger.addStream(Logger.INFO, fls);
@@ -76,6 +98,7 @@ public class LoggerTest {
 		sbls.close();
 		fls.close();
 		cls.close();
+		logFile.delete();
 	}
 	
 	@Test
